@@ -1,20 +1,51 @@
-// @ts-expect-error - static-kdtree doesn't provide types, but the API is simple
-import createKDTree from "static-kdtree";
 import chroma from "chroma-js";
 
-import { colornames, colorKeys, colorTree } from "./colornames";
+import { colornames as allnames } from "./allcolors";
+import { colornames as bestof } from "./bestof";
+import { colornames as short } from "./short";
+import {
+  allTree,
+  bestOfTree,
+  shortTree,
+  allKeys,
+  bestOfKeys,
+  shortKeys,
+} from "./utils";
 
-export function getClosestColorName(inputHex: string): string {
+export function getClosestColorName(
+  type: "best" | "short" | "all",
+  inputHex: string,
+): string {
   // Convert input to Lab space
   const targetPoint = chroma(inputHex).lab();
+  if (type == "all") {
+    // tree.nn returns the index of the nearest point
+    const nearestIndex = allTree.nn(targetPoint);
 
-  // tree.nn returns the index of the nearest point
-  const nearestIndex = colorTree.nn(targetPoint);
+    if (nearestIndex === -1) return "Unknown";
 
-  if (nearestIndex === -1) return "Unknown";
+    const hexMatch = allKeys[nearestIndex];
+    return allnames[hexMatch];
+  }
+  if (type == "short") {
+    // tree.nn returns the index of the nearest point
+    const nearestIndex = shortTree.nn(targetPoint);
 
-  const hexMatch = colorKeys[nearestIndex];
-  return colornames[hexMatch];
+    if (nearestIndex === -1) return "Unknown";
+
+    const hexMatch = shortKeys[nearestIndex];
+    return short[hexMatch];
+  }
+  if (type == "best") {
+    // tree.nn returns the index of the nearest point
+    const nearestIndex = bestOfTree.nn(targetPoint);
+
+    if (nearestIndex === -1) return "Unknown";
+
+    const hexMatch = bestOfKeys[nearestIndex];
+    return bestof[hexMatch];
+  }
+  return "";
 }
 
 // const intToHex = (integer: number) => {
@@ -66,11 +97,23 @@ export function getClosestColorName(inputHex: string): string {
 // };
 
 export default function ColorNamer(args: { currentColor: string }) {
-  const currentColor = getClosestColorName(args.currentColor ?? "#000000");
-
+  const specific = getClosestColorName("all", args.currentColor);
+  const best = getClosestColorName("best", args.currentColor);
+  const short = getClosestColorName("short", args.currentColor);
   return (
-    <p className="text-4xl font-black" style={{ color: args.currentColor }}>
-      {currentColor}
-    </p>
+    <div className="flex flex-col gap-2">
+      <p>All:</p>
+      <p className="text-3xl font-black" style={{ color: args.currentColor }}>
+        {specific}
+      </p>
+      <p>Best of:</p>
+      <p className="text-3xl font-black" style={{ color: args.currentColor }}>
+        {best}
+      </p>
+      <p>Short:</p>
+      <p className="text-3xl font-black" style={{ color: args.currentColor }}>
+        {short}
+      </p>
+    </div>
   );
 }

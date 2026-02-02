@@ -60,8 +60,8 @@ export default function ColourRandomizer(args: {
     const red10s = oldColor.charAt(1);
     const green10s = oldColor.charAt(3);
     const blue10s = oldColor.charAt(5);
-    setTopColor(`#${red10s}0${green10s}0${blue10s}0`);
-    setBottomColor(`#${red10s}F${green10s}F${blue10s}F`);
+    setTopColor(`#${red10s}F${green10s}F${blue10s}F`);
+    setBottomColor(`#${red10s}0${green10s}0${blue10s}0`);
     console.log({ red10s, green10s, blue10s });
   };
 
